@@ -6,8 +6,8 @@ This project utilizes the Rover Environmental Monitorins Station (REMS) data col
 
 # To Do
 ## Data Cleaning
- - [ X ] Convert datetime fields into standardized format
- - [ X ] Remove Wind_speed, Humidity, and weather columns
+ - [X] Convert datetime fields into standardized format
+ - [X] Remove Wind_speed, Humidity, and weather columns
  - [ ] Look into missing data; determine if this was due to a storm or equipment malfunction
  - [ ] Clean up notebook organization
  - [ ] Clean up commenting
