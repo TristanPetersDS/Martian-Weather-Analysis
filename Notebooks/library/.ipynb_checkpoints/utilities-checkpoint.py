@@ -1,5 +1,11 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from statsmodels.graphics.api import qqplot
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
 def check_missing(df, unavailable_value="Value not available"):
     """
@@ -185,3 +191,74 @@ def calculate_year_column(df, ls_column):
         years.append(year)
 
     df['year'] 
+
+
+def decompose_adf(df, feature, lag=200, period=668, model='additive', store=False):
+    """
+    Performs time series decomposition and ADF stationarity test on a given feature.
+
+    Parameters:
+    df (DataFrame): The input DataFrame containing the time series data.
+    feature (str): The column name of the time series feature to analyze.
+    period (int): The seasonal period for decomposition (default is 668 for Mars year).
+    model (str): The type of decomposition model ('additive' or 'multiplicative').
+    store (bool): If True, returns results as a dictionary; otherwise, only prints results.
+
+    Returns:
+    dict (optional): A dictionary containing trend, seasonal, residuals, and ADF test results.
+    """
+
+    try:
+        # Perform seasonal decomposition
+        decompose_result = seasonal_decompose(df[feature], model=model, period=period, extrapolate_trend='freq')
+
+        # Extract components
+        trend = decompose_result.trend
+        seasonal = decompose_result.seasonal
+        residual = decompose_result.resid.dropna()  # Drop NaN values for ADF test
+
+        # Plot decomposition
+        decompose_result.plot()
+        plt.show()
+
+        # Plot histogram of residuals
+        residual.hist(bins=min(len(residual) // 10, 50), figsize=(8, 6), alpha=0.70)
+        plt.title(f"Histogram of Residuals for {feature}")
+        plt.show()
+
+        # Plot autocorrelation
+        plot_acf(residual,lags=lag)
+        plt.title(f"Autocorrelation for {feature}")
+        plt.show()
+        
+        # Perform ADF test
+        dftest = adfuller(residual, autolag='AIC')
+
+        if store:
+            # Store results in a dictionary
+            return {
+                "trend": trend,
+                "seasonal": seasonal,
+                "residual": residual,
+                "ADF Test": {
+                    "ADF Statistic": dftest[0],
+                    "P-Value": dftest[1],
+                    "Num of Lags": dftest[2],
+                    "Num of Observations": dftest[3],
+                    "Critical Values": dftest[4]
+                }
+            }
+        else:
+            # Print ADF results
+            print(f"\nADF Test Results for {feature}:")
+            print("1. ADF Statistic:", dftest[0])
+            print("2. P-Value:", dftest[1])
+            print("3. Num of Lags:", dftest[2])
+            print("4. Num of Observations:", dftest[3])
+            print("5. Critical Values:")
+            for key, val in dftest[4].items():
+                print(f"\t{key}: {val}")
+
+    except Exception as e:
+        print(f"Error in decompose_adf: {e}")
+        return None
