@@ -1,3 +1,7 @@
+import os
+import json
+import joblib
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -6,6 +10,94 @@ from statsmodels.graphics.api import qqplot
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from typing import Optional, Tuple, Dict, Union
+
+
+def load_model_outputs(
+    model_name: str,
+    load_dir: str = "model_outputs/",
+    suffix: Optional[str] = None
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Optional[Dict[str, float]]]:
+    """
+    Load saved prediction outputs and residuals for a model.
+    
+    Parameters:
+        model_name (str): Name of the model (e.g. "LSTM", "SARIMAX")
+        load_dir (str): Directory to load from (default: "model_outputs/")
+        suffix (str): Optional suffix used in saved filenames (e.g. "v2")
+
+    Returns:
+        Tuple containing:
+            - y_true (np.ndarray)
+            - y_pred (np.ndarray)
+            - residuals (np.ndarray)
+            - metrics (dict or None)
+    """
+    tag = model_name.lower()
+    if suffix:
+        tag += f"_{suffix}"
+
+    def _load_npy(filename):
+        path = os.path.join(load_dir, filename)
+        if not os.path.exists(path):
+            raise FileNotFoundError(f"File not found: {path}")
+        return np.load(path)
+
+    # Load arrays
+    y_true = _load_npy(f"y_true_{tag}.npy")
+    y_pred = _load_npy(f"y_pred_{tag}.npy")
+    residuals = _load_npy(f"residuals_{tag}.npy")
+
+    # Load metrics if present
+    metrics_path = os.path.join(load_dir, f"metrics_{tag}.json")
+    metrics = None
+    if os.path.exists(metrics_path):
+        with open(metrics_path, "r") as f:
+            metrics = json.load(f)
+
+    print(f"Loaded outputs for {model_name} from {load_dir}")
+    return y_true, y_pred, residuals, metrics
+
+
+def save_model_outputs(
+    model_name: str,
+    y_true: Union[np.ndarray, pd.Series],
+    y_pred: Union[np.ndarray, pd.Series],
+    save_dir: str = "model_outputs/",
+    metrics: Optional[Dict[str, float]] = None,
+    suffix: Optional[str] = None
+):
+    """
+    Save prediction outputs and evaluation metadata for a forecasting model.
+    
+    Parameters:
+        model_name (str): Name of the model (e.g. "LSTM", "SARIMAX")
+        y_true (array): Ground truth test set values
+        y_pred (array): Model predictions
+        save_dir (str): Base directory to save results into
+        metrics (dict): Optional dict of evaluation metrics (e.g. {"mae": 1.2})
+        suffix (str): Optional suffix to distinguish model versions (e.g. "v2")
+    """
+    os.makedirs(save_dir, exist_ok=True)
+    
+    tag = model_name.lower()
+    if suffix:
+        tag += f"_{suffix}"
+    
+    # Save predictions and residuals
+    np.save(os.path.join(save_dir, f"y_pred_{tag}.npy"), y_pred)
+    np.save(os.path.join(save_dir, f"y_true_{tag}.npy"), y_true)
+    residuals = y_true - y_pred
+    np.save(os.path.join(save_dir, f"residuals_{tag}.npy"), residuals)
+    
+    # Save metrics if provided
+    if metrics:
+        meta_path = os.path.join(save_dir, f"metrics_{tag}.json")
+        with open(meta_path, "w") as f:
+            json.dump(metrics, f, indent=4)
+
+    print(f"Saved outputs for {model_name} to {save_dir}")
+
 
 def check_missing(df, unavailable_value="Value not available"):
     """
