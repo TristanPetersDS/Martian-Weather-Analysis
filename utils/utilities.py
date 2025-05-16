@@ -12,6 +12,20 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from typing import Optional, Tuple, Dict, Union
 
+from tensorflow.keras.utils import Sequence
+
+
+class CombinedSequence(Sequence):
+    def __init__(self, reg_gen, clf_gen):
+        self.reg_gen = reg_gen
+        self.clf_gen = clf_gen
+        assert len(self.reg_gen) == len(self.clf_gen)
+    def __len__(self):
+        return len(self.reg_gen)
+    def __getitem__(self, idx):
+        x, y_reg = self.reg_gen[idx]
+        _, y_clf = self.clf_gen[idx]
+        return x, {"forecast": y_reg, "direction": y_clf}
 
 def load_model_outputs(
     model_name: str,
