@@ -11,6 +11,12 @@ from datetime import datetime, timedelta
 def time_to_minutes(t):
     """
     Convert a time object to total minutes since midnight.
+
+    Parameters:
+        t (datetime.time): Time object to convert.
+
+    Returns:
+        float: Minutes since midnight, or NaN if input is missing.
     """
     if pd.isnull(t):
         return np.nan
@@ -20,6 +26,12 @@ def time_to_minutes(t):
 def minutes_to_time(m):
     """
     Convert total minutes since midnight to a time object.
+
+    Parameters:
+        m (float): Minutes since midnight.
+
+    Returns:
+        datetime.time: Time object, or NaN if input is missing.
     """
     if pd.isnull(m):
         return np.nan
@@ -29,6 +41,12 @@ def minutes_to_time(m):
 def time_to_seconds(t):
     """
     Convert a time object to total seconds since midnight.
+
+    Parameters:
+        t (datetime.time): Time object to convert.
+
+    Returns:
+        float: Seconds since midnight, or NaN if input is missing.
     """
     if pd.isnull(t):
         return np.nan
@@ -38,6 +56,12 @@ def time_to_seconds(t):
 def seconds_to_time(s):
     """
     Convert total seconds since midnight to a time object.
+
+    Parameters:
+        s (float): Seconds since midnight.
+
+    Returns:
+        datetime.time: Time object, or NaN if input is missing.
     """
     if pd.isnull(s):
         return np.nan

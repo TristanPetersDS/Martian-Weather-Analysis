@@ -16,6 +16,13 @@ from tqdm.notebook import tqdm
 def create_lstm_autoencoder(seq_len, n_features):
     """
     Build and compile an LSTM-based autoencoder for sequence reconstruction.
+
+    Parameters:
+        seq_len (int): Length of input sequences.
+        n_features (int): Number of features per time step.
+
+    Returns:
+        keras.Model: Compiled LSTM autoencoder model.
     """
     inp = Input(shape=(seq_len, n_features))
     x   = LSTM(32, return_sequences=False)(inp)
@@ -35,6 +42,13 @@ def create_lstm_autoencoder(seq_len, n_features):
 def prepare_residual_sequences(residuals, seq_len=30):
     """
     Scale residuals and wrap them in a Keras TimeseriesGenerator.
+
+    Parameters:
+        residuals (array-like): 1D array of model residuals.
+        seq_len (int): Sequence length for the generator.
+
+    Returns:
+        Tuple[TimeseriesGenerator, StandardScaler]: Data generator and fitted scaler.
     """
     residuals = residuals.reshape(-1, 1)
     scaler = StandardScaler()
@@ -50,6 +64,14 @@ def prepare_residual_sequences(residuals, seq_len=30):
 def compute_reconstruction_errors(model, gen, batch_size=32):
     """
     Compute mean absolute reconstruction error for each input sequence.
+
+    Parameters:
+        model (keras.Model): Trained autoencoder.
+        gen (Sequence): Generator yielding input sequences.
+        batch_size (int): Size of each batch to evaluate.
+
+    Returns:
+        np.ndarray: Reconstruction errors per sequence.
     """
     errors = []
 
@@ -63,7 +85,15 @@ def compute_reconstruction_errors(model, gen, batch_size=32):
 
 def detect_anomalies(errors, threshold=None, percentile=95):
     """
-    Detect anomalies based on a reconstruction error threshold.
+    Detect anomalies using a threshold on reconstruction error.
+
+    Parameters:
+        errors (array-like): Reconstruction errors for each sequence.
+        threshold (float): Explicit anomaly threshold (optional).
+        percentile (float): Percentile to use if threshold is not specified.
+
+    Returns:
+        Tuple[np.ndarray, float]: Binary anomaly flags and the threshold used.
     """
     if threshold is None:
         threshold = np.percentile(errors, percentile)
@@ -76,7 +106,7 @@ def detect_anomalies(errors, threshold=None, percentile=95):
 
 class TQDMProgressBar(Callback):
     """
-    Keras callback for tqdm-based training progress display.
+    Keras callback for displaying training progress with tqdm.
     """
     def on_train_begin(self, logs=None):
         self.epochs = self.params['epochs']
@@ -98,6 +128,11 @@ class TQDMProgressBar(Callback):
 class AutoencoderSequenceGenerator(tf.keras.utils.Sequence):
     """
     Custom sequence generator for training an autoencoder on time series data.
+
+    Parameters:
+        data (np.ndarray): 2D array of scaled time series data.
+        seq_len (int): Length of each sequence sample.
+        batch_size (int): Number of sequences per batch.
     """
     def __init__(self, data, seq_len=30, batch_size=32):
         self.data = data

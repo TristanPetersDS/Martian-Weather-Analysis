@@ -1,20 +1,3 @@
-import os
-import json
-import joblib
-
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-from statsmodels.graphics.api import qqplot
-from statsmodels.tsa.stattools import adfuller
-from statsmodels.tsa.seasonal import seasonal_decompose
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from typing import Optional, Tuple, Dict, Union
-
-from tensorflow.keras.utils import Sequence
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Data Generators
 # ─────────────────────────────────────────────────────────────────────────────
@@ -22,6 +5,10 @@ from tensorflow.keras.utils import Sequence
 class CombinedSequence(Sequence):
     """
     Keras sequence to merge regression and classification label generators.
+
+    Parameters:
+        reg_gen: Generator yielding regression targets.
+        clf_gen: Generator yielding classification targets.
     """
     def __init__(self, reg_gen, clf_gen):
         self.reg_gen = reg_gen
@@ -48,6 +35,14 @@ def load_model_outputs(
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Optional[Dict[str, float]]]:
     """
     Load saved predictions, residuals, and optional metrics for a model.
+
+    Parameters:
+        model_name (str): Model identifier used in filenames.
+        load_dir (str): Directory to load model outputs from.
+        suffix (str): Optional version suffix for distinguishing saved files.
+
+    Returns:
+        Tuple of (y_true, y_pred, residuals, metrics)
     """
     tag = model_name.lower()
     if suffix:
@@ -83,6 +78,14 @@ def save_model_outputs(
 ):
     """
     Save predictions, residuals, and evaluation metrics for a model.
+
+    Parameters:
+        model_name (str): Model identifier used in filenames.
+        y_true (array): Ground truth values.
+        y_pred (array): Model predictions.
+        save_dir (str): Directory to save outputs to.
+        metrics (dict): Optional evaluation results to save.
+        suffix (str): Optional version suffix for distinguishing saved files.
     """
     os.makedirs(save_dir, exist_ok=True)
 
@@ -108,6 +111,13 @@ def save_model_outputs(
 def check_missing(df, unavailable_value="Value not available"):
     """
     Summarize missing and unavailable values in a DataFrame.
+
+    Parameters:
+        df (DataFrame): Input dataset.
+        unavailable_value (str): Placeholder string indicating unavailable data.
+
+    Returns:
+        DataFrame with missing and unavailable value counts and percentages.
     """
     result = pd.concat([
         df.isnull().sum(),
@@ -121,7 +131,13 @@ def check_missing(df, unavailable_value="Value not available"):
 
 def gap_size(df):
     """
-    Identify and summarize consecutive gaps (NaNs) in columns and index.
+    Identify and summarize NaN gaps in columns and missing index ranges.
+
+    Parameters:
+        df (DataFrame): Input dataset.
+
+    Returns:
+        DataFrame summarizing gap size and positions per column or index.
     """
     gap_data = []
 
@@ -161,7 +177,14 @@ def gap_size(df):
 
 def rolling_mode(series, window=30):
     """
-    Fill missing values using rolling mode.
+    Fill missing values using the mode of a rolling window.
+
+    Parameters:
+        series (Series): Input time series.
+        window (int): Rolling window size for mode calculation.
+
+    Returns:
+        Series with missing values filled by rolling mode.
     """
     def mode_func(x):
         modes = x.mode()
@@ -176,7 +199,13 @@ def rolling_mode(series, window=30):
 
 def map_season(degree):
     """
-    Map solar longitude to Martian season.
+    Map solar longitude (Ls) to Martian season.
+
+    Parameters:
+        degree (float): Solar longitude in degrees [0–360).
+
+    Returns:
+        String representing Martian season.
     """
     if pd.isnull(degree):
         return np.nan
@@ -192,7 +221,13 @@ def map_season(degree):
 
 def map_months(degree):
     """
-    Map solar longitude to Martian calendar month (1–12).
+    Map solar longitude (Ls) to a 12-month Martian calendar.
+
+    Parameters:
+        degree (float): Solar longitude in degrees [0–360).
+
+    Returns:
+        Integer from 1 to 12 representing Martian month.
     """
     if pd.isnull(degree):
         return np.nan
@@ -201,7 +236,14 @@ def map_months(degree):
 
 def calculate_year_column(df, ls_column):
     """
-    Assign year labels by tracking solar longitude resets.
+    Assign Martian year numbers based on Ls reset points.
+
+    Parameters:
+        df (DataFrame): Mars dataset.
+        ls_column (str): Column containing solar longitude (Ls).
+
+    Returns:
+        DataFrame with added 'year' column.
     """
     year = 1
     years = []
@@ -224,7 +266,18 @@ def calculate_year_column(df, ls_column):
 
 def decompose_adf(df, feature, lag=200, period=668, model='additive', store=False):
     """
-    Decompose a time series and run ADF stationarity test.
+    Decompose a time series and run an ADF stationarity test.
+
+    Parameters:
+        df (DataFrame): Input time series data.
+        feature (str): Target column for analysis.
+        lag (int): Lags for ACF plot.
+        period (int): Seasonal period (e.g., 668 sols for Mars).
+        model (str): Decomposition type ('additive' or 'multiplicative').
+        store (bool): If True, return results dictionary; otherwise, print summary.
+
+    Returns:
+        Optional dictionary with trend, seasonal, residual, and ADF results.
     """
     try:
         result = seasonal_decompose(df[feature], model=model, period=period, extrapolate_trend='freq')
