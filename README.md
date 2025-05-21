@@ -124,6 +124,7 @@ This project uses environmental sensor data collected by NASA’s **Curiosity ro
 ## 🧑‍🚀 Author
 
 **Tristan Peters**
+
 M.S. Physics | Data Scientist | [LinkedIn](https://www.linkedin.com/in/tristan-peters-ds/) | [GitHub](https://github.com/TristanPetersDS)
 
 ## 📄 License
