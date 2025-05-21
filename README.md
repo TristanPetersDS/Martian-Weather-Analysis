@@ -25,12 +25,12 @@ This work demonstrates how data collected on another planet can be processed and
 ## 📁 Project Structure
 
 ```plaintext
-├── data/                         # Raw and processed REMS data files
-│   ├── raw/                      # Original REMS dataset from Kaggle
-│   ├── cleaned/                  # Cleaned and gap-imputed data
-│   └── processed/                # Scaled, encoded, and feature-rich datasets
+├── data/                        # Raw and processed REMS data files
+│   ├── raw/                     # Original REMS dataset from Kaggle
+│   ├── cleaned/                 # Cleaned and gap-imputed data
+│   └── processed/               # Scaled, encoded, and feature-rich datasets
 │
-├── notebooks/                    # Jupyter notebooks for each analysis stage
+├── notebooks/                   # Jupyter notebooks for each analysis stage
 │   ├── model_outputs/           # Saved predictions, residuals, metrics, and models
 │   ├── 01_data_cleaning.ipynb   # Handle missing values and temporal structuring
 │   ├── 02_eda.ipynb             # Explore trends and seasonal patterns
@@ -45,7 +45,7 @@ This work demonstrates how data collected on another planet can be processed and
 │   ├── time_handler.py          # Martian time conversion and handling
 │   ├── time_utils.py            # Time encoding and utility helpers
 │   └── utilities.py             # General-purpose functions (loading, cleaning, I/O)
-│
+├── LICENSE                      # MIT License
 └── README.md                    # Project overview (this file)
 
 ```
@@ -124,6 +124,7 @@ This project uses environmental sensor data collected by NASA’s **Curiosity ro
 ## 🧑‍🚀 Author
 
 **Tristan Peters**
+
 M.S. Physics | Data Scientist | [LinkedIn](https://www.linkedin.com/in/tristan-peters-ds/) | [GitHub](https://github.com/TristanPetersDS)
 
 ## 📄 License
