@@ -1,7 +1,5 @@
 # 📈 Forecasting Models
 
----
-
 ## ✅ Best SARIMA Configuration
 
 | Parameter        | Value               |
