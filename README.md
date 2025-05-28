@@ -40,6 +40,9 @@ This work demonstrates how data collected on another planet can be processed and
 ├── outputs/
 │   └── plots/                   # Exported visualizations and figures
 │
+├── reports/
+│   ├── model_metrics.md         # Compiled model performance metrics
+│   ├── project_report.pdf       # Complete report of work performed during capstone
 ├── utils/                       # Python utility scripts
 │   ├── hybrid_anomaly_util.py   # Residual scoring + LSTM anomaly detection
 │   ├── time_handler.py          # Martian time conversion and handling
